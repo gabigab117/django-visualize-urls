@@ -88,10 +88,15 @@ class Sources:
 
     def __init__(self, root):
         self.root = Path(root).resolve()
+        self._displayed = {}
 
     def display(self, filename):
         """(path to show, whether the file belongs to the project)."""
-        path = Path(filename).resolve()
+        if filename not in self._displayed:
+            self._displayed[filename] = self._display(Path(filename).resolve())
+        return self._displayed[filename]
+
+    def _display(self, path):
         for folder in ("site-packages", "dist-packages"):
             if folder in path.parts:
                 return "/".join(path.parts[path.parts.index(folder) + 1 :]), False
@@ -99,32 +104,39 @@ class Sources:
             return path.relative_to(self.root).as_posix(), True
         return path.as_posix(), False
 
+    def file(self, obj):
+        """(path to show, in the project) of the file of a function, class or code object; None if unknown."""
+        try:
+            filename = inspect.getsourcefile(getattr(obj, "__code__", obj))
+        except TypeError:  # built-in
+            return None
+        return self.display(filename) if filename else None
+
     def locate(self, obj):
         """(path, line, in the project) of a function, class or code object; (None, None, False) if unknown."""
-        code = getattr(obj, "__code__", obj)
-        try:
-            filename = inspect.getsourcefile(code)
-        except TypeError:  # built-in
-            filename = None
-        if filename is None:
+        found = self.file(obj)
+        if found is None:
             return None, None, False
-        path, local = self.display(filename)
+        path, local = found
+        code = getattr(obj, "__code__", obj)
         if inspect.iscode(code):
             return path, code.co_firstlineno, local
         try:
+            # Before Python 3.13, this parses the whole module to find a class: only call it when the line is needed.
             return path, inspect.getsourcelines(obj)[1], local
         except OSError:  # a class made by type()
             return path, None, local
 
     def where(self, obj):
         """ "path:line" of project code, None for the code of an installed package."""
-        path, line, local = self.locate(obj)
-        if not local:
+        if not self.is_project(obj):
             return None
+        path, line, _ = self.locate(obj)
         return f"{path}:{line}" if line else path
 
     def is_project(self, obj):
-        return self.locate(obj)[2]
+        found = self.file(obj)
+        return found is not None and found[1]
 
 
 def project_root():
