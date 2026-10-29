@@ -1,0 +1,79 @@
+[project]
+name = "django-visualize-urls"
+version = "0.1.0"
+description = "Map every URL of a Django project with the access control of each route, as a standalone HTML page."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Gabriel Trouvé", email = "gabrieltrouve5@gmail.com" }]
+requires-python = ">=3.11"
+dependencies = ["django>=5.2"]
+keywords = ["django", "urls", "urlconf", "access-control", "security", "audit"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Web Environment",
+    "Framework :: Django",
+    "Framework :: Django :: 5.2",
+    "Framework :: Django :: 6.0",
+    "Framework :: Django :: 6.1",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Security",
+    "Topic :: Software Development :: Documentation",
+    "Topic :: Software Development :: Quality Assurance",
+]
+
+[project.urls]
+Homepage = "https://github.com/gabigab117/django-visualize-urls"
+Changelog = "https://github.com/gabigab117/django-visualize-urls/blob/main/CHANGELOG.md"
+Issues = "https://github.com/gabigab117/django-visualize-urls/issues"
+
+[dependency-groups]
+dev = [
+    "coverage>=7.17",
+    "djangorestframework>=3.18",
+    "pytest>=9.2",
+    "pytest-django>=4.14",
+    "ruff>=0.17",
+]
+# Not installed by default: Playwright and its browser are a heavy download (see "Development" in the README).
+browser = [
+    "playwright>=1.64",
+    "pytest-playwright>=0.10",
+]
+
+[build-system]
+requires = ["uv_build>=0.13.5,<0.14.0"]
+build-backend = "uv_build"
+
+[tool.pytest]
+minversion = "9.0"
+DJANGO_SETTINGS_MODULE = "tests.settings"
+django_find_project = false
+pythonpath = ["."]
+testpaths = ["tests"]
+strict = true
+markers = ["browser: opens the generated page in a real browser (Playwright)"]
+
+[tool.coverage.run]
+branch = true
+source_pkgs = ["django_visualize_urls"]
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 100
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "B", "UP", "SIM", "DJ", "PT"]
+
+[tool.ruff.lint.isort]
+force-single-line = true
