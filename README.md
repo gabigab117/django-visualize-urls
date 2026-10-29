@@ -147,6 +147,16 @@ uv run playwright install chromium
 uv run pytest -m browser
 ```
 
+To release a version, set it (`uv version --bump minor`), move the changes of `CHANGELOG.md` under it, push, then
+publish a GitHub release whose tag is the version:
+
+```bash
+gh release create v0.2.0 --generate-notes
+```
+
+The publish workflow checks that the tag matches the version, builds the package, smoke-tests the wheel and the
+source distribution, then uploads them to PyPI with Trusted Publishing and PEP 740 attestations.
+
 ## License
 
 MIT
