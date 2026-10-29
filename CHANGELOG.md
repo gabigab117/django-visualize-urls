@@ -6,6 +6,8 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-10-29
+
 ### Added
 
 - `visualize_urls` management command: writes the URL map of a project as a standalone HTML page or as JSON
@@ -16,3 +18,6 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
   access mixins, Django REST framework permissions, the admin site, `LoginRequiredMiddleware`, and hints in
   project code.
 - `VISUALIZE_URLS` setting: `HINTS`, `NEUTRAL_DECORATORS`, `ACCESS_DECORATORS`, `EDITOR_URL`.
+
+[Unreleased]: https://github.com/gabigab117/django-visualize-urls/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/gabigab117/django-visualize-urls/releases/tag/v0.1.0
