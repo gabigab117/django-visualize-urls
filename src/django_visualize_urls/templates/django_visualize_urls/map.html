@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>URL map · {{ urlconf }}</title>
+{% verbatim %}
+<style>
+:root {
+  color-scheme: light;
+  --page: #f9f9f7;
+  --surface: #fcfcfb;
+  --chip: #f0efec;
+  --ink: #0b0b0b;
+  --ink-2: #52514e;
+  --muted: #898781;
+  --hairline: #e1e0d9;
+  --ring: rgba(11, 11, 11, 0.10);
+  --hover: rgba(11, 11, 11, 0.035);
+  --accent: #2a78d6;
+  --good: #0ca30c;
+  --warning: #fab219;
+  --serious: #ec835a;
+  --neutral: #898781;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0d0d0d;
+    --surface: #1a1a19;
+    --chip: #2c2c2a;
+    --ink: #f0efec;
+    --ink-2: #c3c2b7;
+    --hairline: #2c2c2a;
+    --ring: rgba(255, 255, 255, 0.10);
+    --hover: rgba(255, 255, 255, 0.04);
+    --accent: #3987e5;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d;
+  --surface: #1a1a19;
+  --chip: #2c2c2a;
+  --ink: #f0efec;
+  --ink-2: #c3c2b7;
+  --hairline: #2c2c2a;
+  --ring: rgba(255, 255, 255, 0.10);
+  --hover: rgba(255, 255, 255, 0.04);
+  --accent: #3987e5;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { background: var(--page); }
+body { margin: 0; background: var(--page); color: var(--ink); font: 14px/1.45 var(--sans); -webkit-font-smoothing: antialiased; }
+.page { max-width: 1200px; margin: 0 auto; padding: 32px 16px 64px; }
+.eyebrow { margin: 0 0 4px; font-size: 12px; color: var(--ink-2); }
+h1 { margin: 0; font-size: 24px; font-weight: 600; letter-spacing: -0.01em; }
+.sub { margin: 4px 0 0; color: var(--ink-2); }
+.sub code { color: var(--ink); }
+
+.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); gap: 8px; margin: 24px 0 12px; }
+.tile { all: unset; box-sizing: border-box; cursor: pointer; display: flex; flex-direction: column; gap: 4px; padding: 12px 14px; background: var(--surface); border-radius: 10px; box-shadow: 0 0 0 1px var(--ring); }
+.tile:hover { background: var(--hover); }
+.tile[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--accent); }
+.tile:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tile-label { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--ink-2); }
+.tile-value { font-size: 22px; font-weight: 600; }
+.sw { width: 10px; height: 10px; border-radius: 2px; flex: none; }
+.protected { --c: var(--good); }
+.hint { --c: var(--warning); }
+.none { --c: var(--neutral); }
+.sw, .seg { background: var(--c); }
+
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 8px; }
+.toolbar input[type="search"] { flex: 1 1 280px; min-width: 0; padding: 8px 12px; border: 0; border-radius: 8px; background: var(--surface); color: var(--ink); box-shadow: 0 0 0 1px var(--ring); font: inherit; }
+.toolbar input[type="search"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 0; }
+.btn { all: unset; box-sizing: border-box; cursor: pointer; padding: 7px 12px; border-radius: 8px; background: var(--surface); box-shadow: 0 0 0 1px var(--ring); font-size: 13px; color: var(--ink); }
+.btn:hover { background: var(--hover); }
+.btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.switch { display: inline-flex; align-items: center; gap: 6px; padding: 0 4px; font-size: 13px; color: var(--ink-2); cursor: pointer; }
+.switch input { accent-color: var(--accent); margin: 0; }
+.status { margin: 0 0 12px; font-size: 13px; color: var(--ink-2); }
+
+.tree { background: var(--surface); border-radius: 12px; box-shadow: 0 0 0 1px var(--ring); padding: 4px 0; }
+.tree > .node + .node { border-top: 1px solid var(--hairline); }
+.node-head { all: unset; box-sizing: border-box; display: flex; align-items: center; gap: 8px; width: 100%; min-height: 40px; padding: 8px 14px; cursor: pointer; }
+.node-head:hover { background: var(--hover); }
+.node-head:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.chev { width: 14px; height: 14px; flex: none; color: var(--ink-2); transition: transform 0.12s; }
+.node-head[aria-expanded="true"] .chev { transform: rotate(90deg); }
+.children { margin-left: 21px; padding-left: 8px; border-left: 1px solid var(--hairline); }
+.children > .node { border-top: 1px solid var(--hairline); }
+.url { font-family: var(--mono); font-size: 13px; color: var(--ink); overflow-wrap: anywhere; }
+.dim { color: var(--muted); }
+.ns { flex: none; font-size: 11px; line-height: 18px; padding: 0 7px; border-radius: 999px; box-shadow: 0 0 0 1px var(--ring); color: var(--ink-2); }
+.module { min-width: 0; font-family: var(--mono); font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.right { margin-left: auto; display: flex; align-items: center; gap: 10px; flex: none; }
+.count { min-width: 76px; text-align: right; font-size: 12px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.meter { display: flex; gap: 2px; width: 96px; height: 6px; border-radius: 3px; overflow: hidden; }
+.seg { display: block; height: 100%; min-width: 2px; }
+.tag { flex: none; font-size: 11px; line-height: 18px; padding: 0 6px; border-radius: 4px; background: var(--chip); color: var(--ink-2); }
+
+.route { padding: 8px 14px; border-top: 1px solid var(--hairline); }
+.route:hover { background: var(--hover); }
+.r1 { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; }
+.ctls { margin-left: auto; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px; }
+.r2 { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin-top: 3px; font-size: 12px; color: var(--ink-2); }
+.name { font-family: var(--mono); }
+.name.missing { font-family: var(--sans); font-style: italic; color: var(--muted); }
+.view { font-family: var(--mono); color: var(--ink-2); text-decoration: none; overflow-wrap: anywhere; }
+a.view:hover { color: var(--ink); text-decoration: underline; }
+.pill { font-size: 11px; line-height: 18px; padding: 0 6px; border-radius: 4px; box-shadow: 0 0 0 1px var(--ring); color: var(--ink-2); }
+.pill.method { font-family: var(--mono); }
+.badge { display: inline-flex; align-items: center; gap: 5px; padding: 1px 8px 1px 5px; border-radius: 999px; background: var(--chip); font-family: var(--mono); font-size: 12px; color: var(--ink); }
+.badge.quiet { background: transparent; box-shadow: inset 0 0 0 1px var(--ring); color: var(--ink-2); padding-left: 8px; }
+.flag { display: inline-flex; align-items: center; gap: 4px; font-family: var(--mono); color: var(--ink); }
+.ic { width: 12px; height: 12px; flex: none; }
+.ic.good { color: var(--good); }
+.ic.hint { color: var(--warning); }
+.ic.none { color: var(--neutral); }
+.ic.serious { color: var(--serious); }
+
+#tip { position: fixed; z-index: 10; max-width: min(440px, calc(100vw - 16px)); padding: 8px 10px; border-radius: 8px; background: var(--surface); color: var(--ink); box-shadow: 0 0 0 1px var(--ring), 0 8px 24px rgba(0, 0, 0, 0.14); font: 12px/1.5 var(--mono); white-space: pre-line; pointer-events: none; }
+
+.notes { margin-top: 28px; max-width: 780px; font-size: 13px; color: var(--ink-2); }
+.notes h2 { margin: 0 0 4px; font-size: 14px; color: var(--ink); }
+.notes dt { margin-top: 10px; font-weight: 600; color: var(--ink); display: flex; align-items: center; gap: 6px; }
+.notes dd { margin: 2px 0 0; }
+code { font-family: var(--mono); font-size: 12px; }
+
+@media (max-width: 640px) {
+  .page { padding-top: 20px; }
+  .module, .tag { display: none; }
+  .count { min-width: 0; }
+  .meter { width: 48px; }
+  .children { margin-left: 10px; padding-left: 4px; }
+  .node-head, .route { padding-left: 10px; padding-right: 10px; }
+}
+</style>
+{% endverbatim %}
+</head>
+<body>
+{% verbatim %}
+<main class="page">
+  <header>
+    <p class="eyebrow" id="eyebrow">django-visualize-urls</p>
+    <h1>URL map</h1>
+    <p class="sub" id="sub"></p>
+  </header>
+
+  <section class="tiles" id="tiles" aria-label="Filter by access control"></section>
+
+  <div class="toolbar">
+    <input type="search" id="q" placeholder="Filter: URL, name, view, decorator…  ( / )" aria-label="Filter the routes" autocomplete="off">
+    <label class="switch"><input type="checkbox" id="third-party"> <span id="third-party-label">Third-party routes</span></label>
+    <button class="btn" id="expand-all" type="button">Expand all</button>
+    <button class="btn" id="collapse-all" type="button">Collapse all</button>
+  </div>
+  <p class="status" id="status" aria-live="polite"></p>
+
+  <div class="tree" id="tree" role="tree" aria-label="URL tree"></div>
+
+  <section class="notes">
+    <h2>How to read the map</h2>
+    <dl>
+      <dt><span class="sw protected"></span>Protected</dt>
+      <dd>A recognized access control on every method: <code>user_passes_test</code> and what builds on it (<code>login_required</code>, <code>staff_member_required</code>, <code>permission_required</code>, the decorators of the project named after their variable), <code>LoginRequiredMixin</code> and its siblings, the DRF <code>permission_classes</code> other than <code>AllowAny</code>, the views served by the admin site (active staff account), and <code>LoginRequiredMiddleware</code>.</dd>
+      <dt><span class="sw hint"></span>Hint in code</dt>
+      <dd>No recognized control, but the code of the view, or of a decorator or mixin of the project, holds <code>is_authenticated</code>, <code>is_staff</code>, <code>PermissionDenied</code>, <code>HttpResponseForbidden</code>, <code>hmac</code>… A hint to read, not a proof: a decorator may answer 403 for another reason than access. A control on some handlers only (<code>method_decorator</code> on <code>post()</code>) is a hint too. The <code>VISUALIZE_URLS</code> setting adds words to look for and names the decorators that do or do not control access.</dd>
+      <dt><span class="sw none"></span>No hint</dt>
+      <dd>Neither a recognized control nor a hint: a public page, or a control made elsewhere (middleware, template, a function the view calls). A view the map could not read counts here too, flagged “could not read” with the error.</dd>
+      <dt>csrf_exempt</dt>
+      <dd>Including the DRF views, exempted by <code>APIView.as_view()</code>; <code>SessionAuthentication</code> checks the CSRF token again.</dd>
+      <dt>Method</dt>
+      <dd>The map reads the URL resolver loaded in memory: nothing is read from the database. A decorator is named after its code (<code>__code__</code>), since <code>functools.wraps</code> gives the wrapper the name of the view. Third-party routes are declared and served by an installed package (admin, auth views…).</dd>
+    </dl>
+  </section>
+</main>
+<div id="tip" role="tooltip" hidden></div>
+{% endverbatim %}
+{{ data }}
+{% verbatim %}
+<script>
+(() => {
+  "use strict";
+  const DATA = JSON.parse(document.getElementById("url-map-data").textContent);
+  const META = DATA.meta;
+  const NUM = new Intl.NumberFormat("en");
+  const CATS = ["protected", "hint", "none"];
+  const ICONS = {
+    chevron: '<svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    good: '<svg class="ic good" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="currentColor"/><path d="m4.6 8.3 2.2 2.2 4.6-4.8" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    hint: '<svg class="ic hint" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="currentColor"/><path d="M8 4.3v4.5" stroke="#0b0b0b" stroke-width="1.8" stroke-linecap="round"/><circle cx="8" cy="11.5" r="1.05" fill="#0b0b0b"/></svg>',
+    none: '<svg class="ic none" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>',
+    serious: '<svg class="ic serious" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.6 15 14H1z" fill="currentColor"/><path d="M8 6v3.6" stroke="#0b0b0b" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="11.8" r="0.95" fill="#0b0b0b"/></svg>',
+  };
+
+  // The data come from the project: they enter the DOM through textContent, never through innerHTML.
+  function el(tag, cls, text) {
+    const node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (text != null) node.textContent = text;
+    return node;
+  }
+  function icon(name) {
+    const holder = document.createElement("span");
+    holder.innerHTML = ICONS[name];
+    return holder.firstElementChild;
+  }
+  const plural = (n, one, many) => `${NUM.format(n)} ${n === 1 ? one : many}`;
+
+  // Tree: the routes declared at the root make a "/" node first, then come the includes.
+  const tree = [
+    { type: "include", url: "/", prefix: "", module: META.urlconf, project: true, root: true,
+      children: DATA.tree.filter((n) => n.type === "route") },
+    ...DATA.tree.filter((n) => n.type === "include"),
+  ];
+  const nodes = [];
+  const routes = [];
+  (function index(list, parent) {
+    for (const n of list) {
+      n.parent = parent;
+      if (n.type === "include") {
+        n.id = nodes.length;
+        nodes.push(n);
+        index(n.children, n);
+      } else {
+        routes.push(n);
+        n.text = [n.url, n.name, n.view, n.kind, n.src, ...(n.methods || []),
+          ...n.controls.flatMap((c) => [c.label, c.detail, c.where])]
+          .filter(Boolean).join(" ").toLowerCase();
+      }
+    }
+  })(tree, null);
+
+  const state = { q: "", thirdParty: false, cats: new Set(), open: new Set() };
+
+  // ---- Rendering ------------------------------------------------------------------------------
+
+  function urlEl(n) {
+    const span = el("span", "url");
+    const prefix = n.prefix && n.prefix !== "/" && n.url !== n.prefix && n.url.startsWith(n.prefix) ? n.prefix : "";
+    if (prefix) span.append(el("span", "dim", prefix));
+    span.append(document.createTextNode(n.url.slice(prefix.length)));
+    return span;
+  }
+
+  function sourceEl(r) {
+    const where = r.src ? `${r.src}${r.line ? ":" + r.line : ""}` : null;
+    if (r.editor_url) {
+      const a = el("a", "view", r.view);
+      a.href = r.editor_url;
+      a.dataset.tip = `${where}\nOpen in the editor`;
+      return a;
+    }
+    const span = el("span", "view", r.view);
+    if (where) span.dataset.tip = where;
+    return span;
+  }
+
+  function badge(c) {
+    const inViewCode = c.kind === "hint" && c.label === "view code";
+    const b = el("span", c.kind === "other" ? "badge quiet" : "badge");
+    const ic = { access: "good", admin: "good", hint: "hint" }[c.kind];
+    if (ic) b.append(icon(ic));
+    const text = inViewCode ? `hint: ${c.detail}` : c.label;
+    b.append(el("span", null, c.scope ? `${text} (${c.scope})` : text));
+    const tip = [];
+    if (inViewCode) tip.push("Hint found in the code of the view: read it to confirm");
+    else if (c.kind === "hint") tip.push(`Hint found in its code: ${c.detail}`);
+    else if (c.detail) tip.push(c.detail);
+    if (c.kind === "other") tip.push("No recognized access control");
+    if (c.scope) tip.push(`Only on ${c.scope}: the other methods are not covered`);
+    if (c.where) tip.push(c.where);
+    if (tip.length) b.dataset.tip = tip.join("\n");
+    return b;
+  }
+
+  function flag(iconName, text, tip) {
+    const f = el("span", "flag");
+    if (iconName) f.append(icon(iconName));
+    f.append(el("span", null, text));
+    f.dataset.tip = tip;
+    return f;
+  }
+
+  const CSRF_TIPS = {
+    exempt: "Exempt from the CSRF check by csrf_exempt",
+    drf: "Exempted by APIView.as_view(); no session authentication",
+    "drf-session": "Exempted by APIView.as_view(); SessionAuthentication checks the CSRF token again",
+  };
+
+  function renderRoute(r) {
+    const row = el("div", "route");
+    row.setAttribute("role", "treeitem");
+    const r1 = el("div", "r1");
+    r1.append(urlEl(r));
+    const ctls = el("span", "ctls");
+    for (const c of r.controls) ctls.append(badge(c));
+    if (r.category === "none" && !r.error) {
+      const b = el("span", "badge quiet");
+      b.append(icon("none"), el("span", null, "no hint"));
+      b.dataset.tip = "Neither a recognized control nor a hint in the code";
+      ctls.prepend(b);
+    }
+    r1.append(ctls);
+    const r2 = el("div", "r2");
+    r2.append(r.name ? el("span", "name", r.name) : el("span", "name missing", "unnamed"));
+    r2.append(sourceEl(r));
+    r2.append(el("span", "pill", r.kind));
+    for (const m of r.methods || []) r2.append(el("span", "pill method", m));
+    if (r.csrf) r2.append(flag("serious", "csrf_exempt", CSRF_TIPS[r.csrf]));
+    if (r.duplicate) r2.append(flag(null, "duplicate name", "Several routes share this name: reverse() returns the last one declared whose arguments fit"));
+    if (r.error) r2.append(flag("serious", "could not read", r.error));
+    row.append(r1, r2);
+    r.el = row;
+    return row;
+  }
+
+  function renderNode(n) {
+    const wrap = el("div", "node");
+    wrap.setAttribute("role", "treeitem");
+    const head = el("button", "node-head");
+    head.type = "button";
+    head.append(icon("chevron"), urlEl(n));
+    if (n.namespace) {
+      const ns = el("span", "ns", n.namespace);
+      ns.dataset.tip = `namespace “${n.namespace}”`;
+      head.append(ns);
+    }
+    const label = n.root ? `${n.module} · routes declared at the root`
+      : n.module || (n.app_name ? `list of patterns (${n.app_name})` : "");
+    if (label) {
+      const mod = el("span", "module", label);
+      if (n.src) mod.dataset.tip = n.src;
+      head.append(mod);
+    }
+    if (!n.project) head.append(el("span", "tag", "third-party"));
+    const right = el("span", "right");
+    n.countEl = el("span", "count");
+    n.meterEl = el("span", "meter");
+    n.meterEl.setAttribute("role", "img");
+    n.segs = {};
+    for (const k of CATS) {
+      n.segs[k] = el("i", `seg ${k}`);
+      n.meterEl.append(n.segs[k]);
+    }
+    right.append(n.countEl, n.meterEl);
+    head.append(right);
+    const kids = el("div", "children");
+    kids.setAttribute("role", "group");
+    for (const child of n.children) kids.append(child.type === "include" ? renderNode(child) : renderRoute(child));
+    head.addEventListener("click", () => {
+      if (state.open.has(n.id)) state.open.delete(n.id);
+      else state.open.add(n.id);
+      setOpen(n, state.open.has(n.id));
+    });
+    wrap.append(head, kids);
+    Object.assign(n, { el: wrap, head, kids });
+    return wrap;
+  }
+
+  function setOpen(n, open) {
+    n.head.setAttribute("aria-expanded", String(open));
+    n.kids.hidden = !open;
+  }
+
+  // ---- Tiles (filters) ------------------------------------------------------------------------
+
+  const TILES = [
+    { key: "all", label: "Routes", test: () => true },
+    { key: "protected", label: "Protected", swatch: "protected", test: (r) => r.category === "protected" },
+    { key: "hint", label: "Hint in code", swatch: "hint", test: (r) => r.category === "hint" },
+    { key: "none", label: "No hint", swatch: "none", test: (r) => r.category === "none" },
+    { key: "csrf", label: "csrf_exempt", icon: "serious", test: (r) => !!r.csrf },
+    { key: "duplicate", label: "Duplicate name", test: (r) => r.duplicate },
+    { key: "unnamed", label: "Unnamed", test: (r) => !r.name },
+    { key: "error", label: "Could not read", icon: "serious", test: (r) => !!r.error },
+  ];
+  const tilesEl = document.getElementById("tiles");
+  for (const t of TILES) {
+    const b = el("button", "tile");
+    b.type = "button";
+    b.dataset.key = t.key;
+    const lab = el("span", "tile-label");
+    if (t.swatch) lab.append(el("span", `sw ${t.swatch}`));
+    if (t.icon) lab.append(icon(t.icon));
+    lab.append(el("span", null, t.label));
+    t.valueEl = el("span", "tile-value");
+    b.append(lab, t.valueEl);
+    b.addEventListener("click", () => {
+      if (t.key === "all") state.cats.clear();
+      else if (state.cats.has(t.key)) state.cats.delete(t.key);
+      else state.cats.add(t.key);
+      apply({ expand: true });
+    });
+    t.el = b;
+    tilesEl.append(b);
+  }
+  const matchesCats = (r) => !state.cats.size || TILES.some((t) => state.cats.has(t.key) && t.test(r));
+
+  // ---- Filtering ------------------------------------------------------------------------------
+
+  const statusEl = document.getElementById("status");
+  const thirdCount = routes.filter((r) => !r.project).length;
+  document.getElementById("third-party-label").textContent = `Third-party routes (${NUM.format(thirdCount)})`;
+
+  function apply({ expand = false } = {}) {
+    const scoped = routes.filter((r) => (state.thirdParty || r.project) && (!state.q || r.text.includes(state.q)));
+    for (const t of TILES) {
+      t.valueEl.textContent = NUM.format(scoped.filter(t.test).length);
+      t.el.setAttribute("aria-pressed", String(t.key === "all" ? !state.cats.size : state.cats.has(t.key)));
+    }
+    const visible = new Set(scoped.filter(matchesCats));
+    for (const n of nodes) n.c = { protected: 0, hint: 0, none: 0, total: 0 };
+    for (const r of routes) {
+      const shown = visible.has(r);
+      r.el.hidden = !shown;
+      if (!shown) continue;
+      for (let p = r.parent; p; p = p.parent) {
+        p.c[r.category] += 1;
+        p.c.total += 1;
+      }
+    }
+    // A filter that leaves few routes shows them all; otherwise the tree keeps its expanded nodes.
+    if (expand && (state.q || state.cats.size) && visible.size <= 150) {
+      for (const n of nodes) if (n.c.total) state.open.add(n.id);
+    }
+    for (const n of nodes) {
+      n.el.hidden = n.c.total === 0;
+      n.countEl.textContent = plural(n.c.total, "route", "routes");
+      for (const k of CATS) {
+        n.segs[k].style.flexGrow = n.c[k];
+        n.segs[k].hidden = n.c[k] === 0;
+      }
+      const tip = `${NUM.format(n.c.protected)} protected\n${NUM.format(n.c.hint)} with a hint\n${NUM.format(n.c.none)} without a hint`;
+      n.meterEl.dataset.tip = tip;
+      n.meterEl.setAttribute("aria-label", tip.replaceAll("\n", ", "));
+      setOpen(n, state.open.has(n.id));
+    }
+    const parts = [plural(visible.size, "route shown", "routes shown")];
+    if (!state.thirdParty) parts.push(plural(thirdCount, "third-party route hidden", "third-party routes hidden"));
+    if (state.q) parts.push(`search “${state.q}”`);
+    statusEl.textContent = parts.join(" · ");
+  }
+
+  // ---- Interactions ---------------------------------------------------------------------------
+
+  const treeEl = document.getElementById("tree");
+  for (const n of tree) treeEl.append(renderNode(n));
+
+  document.getElementById("eyebrow").textContent = `django-visualize-urls ${META.version}`;
+  const generated = new Date(META.generated).toLocaleString("en", { dateStyle: "medium", timeStyle: "short" });
+  const sub = document.getElementById("sub");
+  sub.append(el("code", null, META.urlconf), ` · Django ${META.django} · generated ${generated}`);
+  const notes = [];
+  if (META.login_middleware) notes.push("LoginRequiredMiddleware: every route requires login unless its view is marked login_not_required");
+  else notes.push("no LoginRequiredMiddleware: a route without a control is public");
+  if (META.drf_default_permissions) notes.push(`default DRF permissions: ${META.drf_default_permissions.join(", ")}`);
+  sub.append(el("br"), notes.join(" · "));
+
+  const search = document.getElementById("q");
+  let timer;
+  search.addEventListener("input", () => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      state.q = search.value.trim().toLowerCase();
+      apply({ expand: true });
+    }, 120);
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "/" && document.activeElement !== search) {
+      e.preventDefault();
+      search.focus();
+    }
+  });
+  document.getElementById("third-party").addEventListener("change", (e) => {
+    state.thirdParty = e.target.checked;
+    apply();
+  });
+  document.getElementById("expand-all").addEventListener("click", () => {
+    for (const n of nodes) state.open.add(n.id);
+    apply();
+  });
+  document.getElementById("collapse-all").addEventListener("click", () => {
+    state.open.clear();
+    apply();
+  });
+
+  // A single tooltip, on hover and keyboard focus.
+  const tipEl = document.getElementById("tip");
+  function showTip(target) {
+    tipEl.textContent = target.dataset.tip;
+    tipEl.hidden = false;
+    const box = target.getBoundingClientRect();
+    const x = Math.min(Math.max(8, box.left), innerWidth - tipEl.offsetWidth - 8);
+    let y = box.bottom + 6;
+    if (y + tipEl.offsetHeight > innerHeight - 8) y = box.top - tipEl.offsetHeight - 6;
+    tipEl.style.left = `${x}px`;
+    tipEl.style.top = `${y}px`;
+  }
+  document.addEventListener("pointerover", (e) => {
+    const t = e.target.closest("[data-tip]");
+    if (t) showTip(t);
+  });
+  document.addEventListener("pointerout", (e) => {
+    const t = e.target.closest("[data-tip]");
+    if (t && !t.contains(e.relatedTarget)) tipEl.hidden = true;
+  });
+  document.addEventListener("focusin", (e) => {
+    const t = e.target.closest("[data-tip]");
+    if (t) showTip(t);
+  });
+  document.addEventListener("focusout", () => { tipEl.hidden = true; });
+  addEventListener("scroll", () => { tipEl.hidden = true; }, { passive: true });
+
+  apply();
+})();
+</script>
+{% endverbatim %}
+</body>
+</html>
