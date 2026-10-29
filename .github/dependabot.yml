@@ -1,0 +1,12 @@
+# The workflows pin their actions by commit SHA: Dependabot bumps them, with their version comment,
+# in one pull request a month at most.
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    groups:
+      actions:
+        patterns:
+          - "*"
